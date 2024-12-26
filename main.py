@@ -12,6 +12,7 @@ from PIL import Image
 import calcul_random
 
 pygame.init()
+# debut du code
 
 
 class App:
