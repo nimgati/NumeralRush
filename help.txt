@@ -1,0 +1,23 @@
+Aide NumeralRush :
+
+calcul :
+    * : multiplication, ex → 2 * 3 = 6
+    / : division, ex → 6 / 2 = 3
+    + : addition, ex → 2 + 3 = 5
+    - : soustraction, ex → 5 - 2 = 3
+    √ : racine carree, ex → √4 = 2
+    ∛ : racine cubique, ex → ∛8 = 2
+    ^ : puissance, ex → 2^3 = 8
+    % : modulo (reste de la division), ex → 5 % 2 = 1
+
+Level :
+    chaque fois que vous vous entrainez vous gagner de l'xp :
+    plus vous gagnez d'xp plus le mode de jeux sera dur
+
+Score :
+    le score est augmenté quand vous jouez en mode classique et il vous permet de debloqué des competitions
+
+Competition :
+    les competitions sont des jeux plus difficiles et ils vous ferons gagner de l'xp
+
+
