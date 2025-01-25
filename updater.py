@@ -69,7 +69,7 @@ def get_directory_content(directory_path):
 
 def update_checker():
     content = content_file("NumeralRush_v1/version.nr")
-    with open("version", 'r') as file:
+    with open("../../version", 'r') as file:
         version = file.read()
     if content.split(":")[1] == version.split(":")[1]:
         return False
@@ -111,7 +111,7 @@ def update():
                 print(f"mise à jour de {i} terminée.")
 
         content = content_file("NumeralRush_v1/version.nr")
-        with open("version", 'w') as file:
+        with open("../../version", 'w') as file:
             file.write(content)
 
         print("Mise à jour terminée.")
@@ -140,7 +140,8 @@ def check_update():
 
     progress_bar.start()
 
-    with open("version", 'r') as file:
+    # trouver le chemin du exacte du fichier version
+    with open("../../version", 'r') as file:
         version = file.read()
 
     label_version = customtkinter.CTkLabel(master=root, corner_radius=0, fg_color="transparent"
@@ -166,7 +167,7 @@ def check_update():
                 progress_bar.stop()
                 progress_bar.set(1)
                 progress_bar.configure(mode="determinate", progress_color="green")
-                with open("version", 'r') as file:
+                with open("../../version", 'r') as file:
                     version = file.read()
                 label_version.configure(text="version actuelle : " + version.split(":")[1][:-1])
                 label.configure(text="Mise à jour terminée.")
@@ -196,5 +197,3 @@ def check_update():
     update_root()
 
     root.mainloop()
-
-check_update()
