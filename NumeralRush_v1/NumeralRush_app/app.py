@@ -269,10 +269,12 @@ class Application:
                                                        "Vous pouvez maintenant vous connecter")
                 return self.login()
 
-        button_login = customtkinter.CTkButton(master=frame_right, text="S'inscrire", command=validate)
+        button_login = customtkinter.CTkButton(master=self.frame_right, text="S'inscrire", command=validate,
+                                               font=("Arial", 20), corner_radius=10)
         button_login.pack(pady=10, padx=10)
 
-        button_register = customtkinter.CTkButton(master=frame_right, text="Se connecter", command=lambda : self.login())
+        button_register = customtkinter.CTkButton(master=self.frame_right, text="Se connecter", command=self.login
+                                                  , font=("Arial", 20), corner_radius=10)
         button_register.pack(pady=10, padx=10)
 
         frame_right.pack(pady=0, padx=0, fill="y", side="right")
