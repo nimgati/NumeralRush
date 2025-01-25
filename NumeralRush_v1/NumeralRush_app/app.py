@@ -1,5 +1,6 @@
 import time
 import tkinter
+import _tkinter
 import uuid
 import customtkinter
 import tkinter.messagebox
@@ -62,7 +63,7 @@ class Application:
         try:
             self.logo = customtkinter.CTkLabel(master=self.frame_body, image=file_icon, text="")
             self.logo.place(relx=0.5, rely=0.35, anchor="center")
-        except RuntimeError:
+        except RuntimeError or _tkinter.TclError:
             tkinter.messagebox.showerror("NumeralRush - Version " + opt.__version__, "Une erreur est survenue lors du chargement de l'application."
                                                                                      "veuillez fermer et relancer l'application.")
             for i in self.root.winfo_children():
@@ -126,6 +127,14 @@ class Application:
             canvas.create_rectangle(560, 15, 790 + (10 * (len(best_player) - 8)), 85, outline="white", width=3)
             canvas.create_image(600, 50, image=self.medaille_image, anchor="center")
             canvas.create_text(700 + (5 * (len(best_player) - 8)), 50, text=best_player, font=("Arial", 20, "bold"), fill="black")
+            button_xp = customtkinter.CTkButton(master=self.frame_header, text=str(self.user_data["xp"]) + " XP"
+                                                , width=120, corner_radius=0, font=("Arial", 20), border_width=2,
+                                                text_color="white", border_color="white", height=50)
+            button_xp.place(x=330, y=0)
+            button_piece = customtkinter.CTkButton(master=self.frame_header, text=str(self.user_data["piece"]) + " 💎"
+                                                    , width=120, corner_radius=0, font=("Arial", 20)
+                                                   , height=50, border_color="white", border_width=2)
+            button_piece.place(x=330, y=51)
 
         canvas.pack(pady=0, padx=0, fill="x", side="top")
 
@@ -308,19 +317,39 @@ class Application:
         self.root.title("NumeralRush - Version " + opt.__version__ + " - Leaderboard")
 
         players : dict[str, dict[str, str | int | list]]= self.db.get_all_users_data()
-        print(players)
+        if len(players) > 50:
+            players = dict(list(players.items())[:50])
 
         players_sorted = sorted(players.items(), key=lambda x: x[1]['xp'], reverse=True)
 
         del players
-        for place, player in enumerate(players_sorted):
-            frame_player
 
-    def profile(self):
-        self.reset_root()
-        self.place_header(best_player=self.db.get_best_player()[0], button_back=1)
-        self.root.title("NumeralRush - Version " + opt.__version__ + " - Profil")
-        pass
+        for i in players_sorted:
+            frame_player = customtkinter.CTkFrame(master=self.frame_body, corner_radius=30, border_color="white",
+                                                  border_width=2, fg_color="transparent", width=self.width_root - 20,
+                                                  height=100)
+            frame_player.pack_propagate(False)
+            frame_player.pack(pady=10, padx=10)
+
+            first = False
+
+            if players_sorted.index(i) == 0:
+                img_medal = customtkinter.CTkImage(light_image=Image.open("NumeralRush_v1/NumeralRush_app/src/medaille-dor.png"),
+                                                    dark_image=Image.open("NumeralRush_v1/NumeralRush_app/src/medaille-dor.png"),
+                                                    size=(70, 70))
+                label_medal = customtkinter.CTkLabel(master=frame_player, image=img_medal, text="")
+                label_medal.pack(side="left", padx=10)
+                first = True
+            else:
+                label_rank = customtkinter.CTkLabel(master=frame_player, text=str(players_sorted.index(i) + 1),
+                                                    font=("Arial", 40, "bold"), text_color='white')
+                label_rank.pack(side="left", padx=20)
+
+            label_username = customtkinter.CTkLabel(master=frame_player, text=str(i[0]), font=("Arial", 30))
+            label_username.pack(pady=10, padx=10, side="right")
+
+            label_xp = customtkinter.CTkLabel(master=frame_player, text=str(i[1]['xp']), font=("Arial", 30))
+            label_xp.pack(pady=10, padx=10, side="right")
 
     def settings(self):
         self.reset_root()
@@ -371,7 +400,7 @@ class Application:
         frame_buttons34 = customtkinter.CTkFrame(master=self.frame_body, width=900, corner_radius=0
                                                   , border_width=0, fg_color="transparent")
         button_leaderboard = button_menu(title="Leaderboard", command=self.leaderboard, master=frame_buttons34)
-        button_profile = button_menu(title="Profil", command=self.profile, master=frame_buttons34)
+        button_profile = button_menu(title="Profil", command=None, master=frame_buttons34)
         frame_buttons34.pack(pady=0, padx=0)
 
         frame_buttons56 = customtkinter.CTkFrame(master=self.frame_body, width=900, corner_radius=0
