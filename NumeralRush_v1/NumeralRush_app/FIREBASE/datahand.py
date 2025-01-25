@@ -8,11 +8,11 @@ from firebase_admin import db, firestore
 class Datahand:
     def __init__(self):
         # Charger la clé et les données chiffrées
-        with open("FIREBASE/firebase_encrypted.key", "rb") as key_file:
+        with open("NumeralRush_v1/NumeralRush_app/FIREBASE/firebase_encrypted.key", "rb") as key_file:
             key = key_file.read()
         cipher_suite = Fernet(key)
 
-        with open("FIREBASE/serviceAccountKey.enc", "rb") as enc_file:
+        with open("NumeralRush_v1/NumeralRush_app/FIREBASE/serviceAccountKey.enc", "rb") as enc_file:
             decrypted_data = cipher_suite.decrypt(enc_file.read())
 
         cred = credentials.Certificate(json.loads(decrypted_data))

@@ -46,10 +46,10 @@ class Application:
         self.frame_body.place(x=0, y=0)
         self.frame_body.update()
 
-        for i in range(1, 900, 3):
+        for i in range(1, 900, 4):
             self.frame_body.place(x=0, y=i)
             self.root.update()
-            time.sleep(0.0005)
+            time.sleep(0.0003)
 
         for i in self.frame_body.winfo_children():
             i.destroy()
@@ -59,8 +59,18 @@ class Application:
         self.place_root_center()
 
     def loader(self):
-        self.logo = customtkinter.CTkLabel(master=self.frame_body, image=file_icon, text="")
-        self.logo.place(relx=0.5, rely=0.35, anchor="center")
+        try:
+            self.logo = customtkinter.CTkLabel(master=self.frame_body, image=file_icon, text="")
+            self.logo.place(relx=0.5, rely=0.35, anchor="center")
+        except RuntimeError:
+            tkinter.messagebox.showerror("NumeralRush - Version " + opt.__version__, "Une erreur est survenue lors du chargement de l'application."
+                                                                                     "veuillez fermer et relancer l'application.")
+            for i in self.root.winfo_children():
+                i.destroy()
+            while True:
+                time.sleep(0.001)
+                self.root.update()
+
         self.label_name = customtkinter.CTkLabel(master=self.frame_body, text="NumeralRush - Version " + opt.__version__
                                                  , font=("Arial", 18))
         self.label_name.place(relx=0.5, rely=0.61, anchor="center")
@@ -78,7 +88,7 @@ class Application:
                 for _ in range(1, 20):
                     text.append([str(uuid.uuid4()) + "\n", str(uuid.uuid4()) + "\n", str(uuid.uuid4()) + "\n"])
                     self.root.update()
-                    time.sleep(0.0005)
+                    time.sleep(0.0003)
                     self.root.update()
                 f.write("\n".join("".join(i) for i in text))
         self.root.update()
@@ -87,10 +97,10 @@ class Application:
         self.progress_bar.configure(mode="determinate")
         for i in range(100):
             self.progress_bar.set(i/100)
-            time.sleep(0.0001)
+            time.sleep(0.00005)
             self.root.update()
         for i in range(1, 200):
-            time.sleep(0.001)
+            time.sleep(0.0005)
             self.root.update()
         self.reset_root()
 
@@ -269,11 +279,11 @@ class Application:
                                                        "Vous pouvez maintenant vous connecter")
                 return self.login()
 
-        button_login = customtkinter.CTkButton(master=self.frame_right, text="S'inscrire", command=validate,
-                                               font=("Arial", 20), corner_radius=10)
-        button_login.pack(pady=10, padx=10)
+        customtkinter.CTkButton(master=frame_right, text="S'inscrire", command=lambda : validate(),
+                                               font=("Arial", 20), corner_radius=10).pack(pady=10, padx=10)
 
-        button_register = customtkinter.CTkButton(master=self.frame_right, text="Se connecter", command=self.login
+
+        button_register = customtkinter.CTkButton(master=frame_right, text="Se connecter", command=self.login
                                                   , font=("Arial", 20), corner_radius=10)
         button_register.pack(pady=10, padx=10)
 
@@ -296,7 +306,15 @@ class Application:
         self.reset_root()
         self.place_header(best_player=self.db.get_best_player()[0], button_back=1)
         self.root.title("NumeralRush - Version " + opt.__version__ + " - Leaderboard")
-        pass
+
+        players : dict[str, dict[str, str | int | list]]= self.db.get_all_users_data()
+        print(players)
+
+        players_sorted = sorted(players.items(), key=lambda x: x[1]['xp'], reverse=True)
+
+        del players
+        for place, player in enumerate(players_sorted):
+            frame_player
 
     def profile(self):
         self.reset_root()
@@ -308,7 +326,14 @@ class Application:
         self.reset_root()
         self.place_header(best_player=self.db.get_best_player()[0], button_back=1)
         self.root.title("NumeralRush - Version " + opt.__version__ + " - Settings")
-        pass
+
+        button_disconnect = customtkinter.CTkButton(master=self.frame_body, text="Se deconnecter", command=self.login
+                                                  , font=("Arial", 20), corner_radius=10)
+        button_disconnect.pack(pady=10, padx=10)
+
+        button_back = customtkinter.CTkButton(master=self.frame_body, text="Retour", command=self.menu
+                                                  , font=("Arial", 20), corner_radius=10)
+        button_back.pack(pady=10, padx=10)
 
     def shop(self):
         self.reset_root()

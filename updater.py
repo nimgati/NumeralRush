@@ -185,7 +185,8 @@ def check_update():
             progress_bar.stop()
             progress_bar.set(1)
             progress_bar.configure(mode="determinate", progress_color="red")
-            button_update.configure(state="enabled", text="continuer", command=lambda: root.destroy())
+            root.destroy()
+            return None
 
     root.after(1000, lambda : threading.Thread(target=asyncio.run, args=(check(),)).start())
 
