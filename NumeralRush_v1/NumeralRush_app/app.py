@@ -9,13 +9,13 @@ import ctypes
 import NumeralRush_v1.NumeralRush_app.FIREBASE.datahand as datahand
 
 file_icon = customtkinter.CTkImage(
-    light_image=Image.open("NumeralRush_app/src/logo_app.png"),
-    dark_image=Image.open("NumeralRush_app/src/logo_app.png"),
+    light_image=Image.open("src/logo_app.png"),
+    dark_image=Image.open("src/logo_app.png"),
     size=(230, 230)
 )
 
 file_banner = customtkinter.CTkImage(
-    dark_image=Image.open("NumeralRush_app/src/banniere.png").rotate(180),
+    dark_image=Image.open("src/banniere.png").rotate(180),
     size=(900, 100)
 )
 
@@ -27,7 +27,7 @@ class Application:
         self.user_data = None
         self.height_root, self.width_root = opt.height, opt.width
         self.root = customtkinter.CTk()
-        self.root.iconbitmap("NumeralRush_app/src/logo_app.ico")
+        self.root.iconbitmap("src/logo_app.ico")
         self.root.geometry(f"{self.width_root}x{self.height_root}")
         self.root.resizable(False, False)
         self.root.title("NumeralRush - Version " + opt.__version__)
@@ -73,7 +73,7 @@ class Application:
         for i in range(100):
             self.root.update()
             self.label_name.configure(text="NumeralRush - Version " + opt.__version__ + " - " + str(i) + "%")
-            with open("NumeralRush_app/loader_cache.txt", "w") as f:
+            with open("loader_cache.txt", "w") as f:
                 text = []
                 for _ in range(1, 20):
                     text.append([str(uuid.uuid4()) + "\n", str(uuid.uuid4()) + "\n", str(uuid.uuid4()) + "\n"])
@@ -100,8 +100,8 @@ class Application:
             master=self.frame_body, height=100, corner_radius=0, border_color="white", border_width=2
         )
 
-        self.banner_image = ImageTk.PhotoImage(Image.open("NumeralRush_app/src/banniere.png").rotate(180))
-        self.medaille_image = ImageTk.PhotoImage(Image.open("NumeralRush_app/src/medaille-dor.png").resize((40, 40)))
+        self.banner_image = ImageTk.PhotoImage(Image.open("src/banniere.png").rotate(180))
+        self.medaille_image = ImageTk.PhotoImage(Image.open("src/medaille-dor.png").resize((40, 40)))
 
         canvas = tkinter.Canvas(self.frame_header, width=900, height=100)
         canvas.create_image(0, 0, image=self.banner_image, anchor="nw")
@@ -143,8 +143,8 @@ class Application:
                                                  , border_color="white", border_width=1)
 
         label_img = customtkinter.CTkLabel(master=self.frmae_left, image=
-                                           customtkinter.CTkImage(light_image=Image.open("NumeralRush_app/src/Connexion.png")
-                                                                  , dark_image=Image.open("NumeralRush_app/src/Connexion.png"),
+                                           customtkinter.CTkImage(light_image=Image.open("src/Connexion.png")
+                                                                  , dark_image=Image.open("src/Connexion.png"),
                                                                   size=(500, 400))
                                            , text="")
         label_img.pack(pady=1, padx=1)
@@ -209,8 +209,8 @@ class Application:
                                                  , border_color="white", border_width=1)
 
         label_img = customtkinter.CTkLabel(master=self.frmae_left, image=
-        customtkinter.CTkImage(light_image=Image.open("NumeralRush_app/src/Inscription.png")
-                               , dark_image=Image.open("NumeralRush_app/src/Inscription.png"),
+        customtkinter.CTkImage(light_image=Image.open("src/Inscription.png")
+                               , dark_image=Image.open("src/Inscription.png"),
                                size=(500, 400))
                                            , text="")
         label_img.pack(pady=1, padx=1)
