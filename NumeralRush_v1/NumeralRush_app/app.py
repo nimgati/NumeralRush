@@ -3,10 +3,10 @@ import tkinter
 import uuid
 import customtkinter
 import tkinter.messagebox
-import NumeralRush_app.opt as opt
+import NumeralRush_v1.NumeralRush_app.opt as opt
 from PIL import Image, ImageTk
 import ctypes
-import NumeralRush_app.FIREBASE.datahand as datahand
+import NumeralRush_v1.NumeralRush_app.FIREBASE.datahand as datahand
 
 file_icon = customtkinter.CTkImage(
     light_image=Image.open("NumeralRush_app/src/logo_app.png"),
