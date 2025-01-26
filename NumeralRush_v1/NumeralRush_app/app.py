@@ -1,3 +1,4 @@
+import os
 import time
 import tkinter
 import _tkinter
@@ -21,7 +22,7 @@ file_banner = customtkinter.CTkImage(
 )
 
 class Application:
-    def __init__(self):
+    def __init__(self, root : customtkinter.CTk=None):
         self.button_piece = None
         self.button_xp = None
         customtkinter.set_appearance_mode("green")
@@ -30,7 +31,7 @@ class Application:
         self.user_data = None
         self.username = None
         self.height_root, self.width_root = opt.height, opt.width
-        self.root = customtkinter.CTk()
+        self.root = root
         self.root.iconbitmap("NumeralRush_v1/NumeralRush_app/src/logo_app.ico")
         self.root.geometry(f"{self.width_root}x{self.height_root}")
         self.root.resizable(False, False)
@@ -69,8 +70,6 @@ class Application:
         except RuntimeError or _tkinter.TclError:
             tkinter.messagebox.showerror("NumeralRush - Version " + opt.__version__, "Une erreur est survenue lors du chargement de l'application."
                                                                                      "veuillez fermer et relancer l'application.")
-            for i in self.root.winfo_children():
-                i.destroy()
             while True:
                 time.sleep(0.001)
                 self.root.update()
@@ -309,11 +308,23 @@ class Application:
         self.root.title("NumeralRush - Version " + opt.__version__ + " - Jeu")
         pass
 
+    def play_level(self, level):
+        self.reset_root()
+        self.place_header(best_player=self.db.get_best_player()[0], button_back=1)
+        self.root.title("NumeralRush - Version " + opt.__version__ + " - Jeu")
+        pass
+
     def play_trainig(self):
         self.reset_root()
         self.place_header(best_player=self.db.get_best_player()[0], button_back=1)
         self.root.title("NumeralRush - Version " + opt.__version__ + " - Training")
-        pass
+        frame_level = customtkinter.CTkScrollableFrame(master=self.frame_body, width=900, corner_radius=0
+                                                       , border_color="white", border_width=1, fg_color="transparent")
+        frame_level.pack(pady=0, padx=0, fill="y", side="left")
+        for num, level in enumerate(os.listdir("NumeralRush_v1/NumeralRush_app/level")):
+            button_level = customtkinter.CTkButton(master=frame_level, text="Niveau " + str(num + 1),
+                                                  font=("Arial", 28), width=(self.width_root / 5) - 20)
+            button_level.grid(row=num//5, column=num%5, padx=10, pady=10)
 
     def leaderboard(self):
         self.reset_root()
@@ -335,15 +346,12 @@ class Application:
             frame_player.pack_propagate(False)
             frame_player.pack(pady=10, padx=10)
 
-            first = False
-
             if players_sorted.index(i) == 0:
                 img_medal = customtkinter.CTkImage(light_image=Image.open("NumeralRush_v1/NumeralRush_app/src/medaille-dor.png"),
                                                     dark_image=Image.open("NumeralRush_v1/NumeralRush_app/src/medaille-dor.png"),
                                                     size=(70, 70))
                 label_medal = customtkinter.CTkLabel(master=frame_player, image=img_medal, text="")
                 label_medal.pack(side="left", padx=10)
-                first = True
             else:
                 label_rank = customtkinter.CTkLabel(master=frame_player, text=str(players_sorted.index(i) + 1),
                                                     font=("Arial", 40, "bold"), text_color='white')

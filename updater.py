@@ -2,6 +2,7 @@ import asyncio
 import threading
 import time
 
+import customtkinter
 import git
 import os
 import stat
@@ -66,30 +67,54 @@ def get_directory_content(directory_path):
     except git.exc.GitCommandError:
         return None
 
-def update_checker():
-    content = content_file("NumeralRush_v1/version.nr")
+def update_checker(root : customtkinter.CTk):
+    root.update()
+    content = None
+
+    def test():
+        global content
+        def th1():
+            content = content_file("NumeralRush_v1/version.nr")
+            return content
+        content = th1()
+        with open("content", 'w') as file:
+            file.write(content)
+
+    threading.Thread(target=test, args=()).start()
+
+    while threading.active_count() > 1:
+        time.sleep(0.001)
+        root.update()
+
+    with open("content", 'r') as file:
+        content = file.read()
+
+    with open("content", 'w') as file:
+        file.write("//")
+
     with open("version", 'r') as file:
         version = file.read()
+
     if content.split(":")[1] == version.split(":")[1]:
         return False
     else:
         return True, 'Mise à jour disponible : ' + version.split(":")[1][:-1] + " -> " + content.split(":")[1]
 
-def update():
+def update(label : customtkinter.CTkLabel = None, progress_bar : customtkinter.CTkProgressBar=None):
     response = "o"
     if response.lower() == "o":
-        print("Mise à jour en cours...")
 
         for i in get_directory_content("./NumeralRush").split("\n"):
+            number_files = len(get_directory_content("./NumeralRush").split("\n"))
+            pourcent = round((get_directory_content("./NumeralRush").split("\n").index(i) + 1) / number_files * 100)
             if i != "":
                 if "data/" in i or "version.nr" in i:
                     continue
-                print(f"mise à jour de {i}...")
+                label.configure(text=f"Mise à jour de {i} en cours..." + f" ({pourcent}%)")
+                progress_bar.set((get_directory_content("./NumeralRush").split("\n").index(i) + 1) / number_files)
                 # recuperer le contenu du fichier
                 content = content_file(f"./{i}")
                 if content == None:
-                    print("error : le fichier indiqué n'existe pas dans le dépôt.")
-                    print(f"mise à jour de {i} annulée.")
                     continue
                 # enregistrer le contenu dans le fichier
                 # voir si le chemin existe
@@ -99,7 +124,7 @@ def update():
                     if not isinstance(content, str) and content[0] == "image":
                         with open(f"{i}", 'wb') as file:
                             file.write(content[1])
-                            print(f"mise à jour de {i} terminée.")
+                            label.configure(text=f"Mise à jour de {i} terminée..." + f" ({pourcent}%)")
                             continue
                     with open(f"{i}", 'w') as file:
                         file.write(content)
@@ -107,7 +132,7 @@ def update():
                     os.chmod(f"{i}", 0o777)
                     with open(f"{i}", 'w') as file:
                         file.write(content)
-                print(f"mise à jour de {i} terminée.")
+                label.configure(text=f"Mise à jour de {i} terminée..." + f" ({pourcent}%)")
 
         content = content_file("NumeralRush_v1/version.nr")
         with open("version", 'w') as file:
@@ -154,9 +179,7 @@ def check_update():
     def update_callback():
         label.configure(text="Mise à jour en cours...")
         button_update.configure(state="disabled")
-        threading.Thread(target=update, args=()).start()
-        progress_bar.configure(mode="indeterminate", progress_color="#74b6fc")
-        progress_bar.start()
+        threading.Thread(target=update, args=(label, progress_bar)).start()
         while True:
             root.update()
             if maj1 == False:
@@ -172,8 +195,11 @@ def check_update():
                 label.configure(text="Mise à jour terminée.")
                 break
 
-    async def check():
-        if isinstance(update_checker(), tuple):
+        return root
+
+    def check():
+        root.update()
+        if isinstance(update_checker(root), tuple):
             button_update.configure(state="normal")
             progress_bar.stop()
             label.configure(text=update_checker()[1])
@@ -185,15 +211,11 @@ def check_update():
             progress_bar.stop()
             progress_bar.set(1)
             progress_bar.configure(mode="determinate", progress_color="red")
-            root.destroy()
-            return None
+            for i in range(1, 500):
+                root.update()
+                time.sleep(0.001)
+            for i in root.winfo_children():
+                i.destroy()
+            return root
 
-    root.after(1000, lambda : threading.Thread(target=asyncio.run, args=(check(),)).start())
-
-    def update_root():
-        root.update()
-        root.after(10, update_root)
-
-    update_root()
-
-    root.mainloop()
+    return check()
