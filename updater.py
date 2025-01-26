@@ -94,24 +94,29 @@ def update_checker(root : customtkinter.CTk):
 
     with open("version", 'r') as file:
         version = file.read()
+    print(content.split(":"), version.split(":")[1])
 
     if content.split(":")[1] == version.split(":")[1]:
         return False
     else:
         return True, 'Mise à jour disponible : ' + version.split(":")[1][:-1] + " -> " + content.split(":")[1]
 
-def update(label : customtkinter.CTkLabel = None, progress_bar : customtkinter.CTkProgressBar=None):
+def send_msg(porcent_bar : str, label_text : str):
+    with open("content", 'w') as file:
+        file.write(f"{porcent_bar}\n{label_text}")
+
+def update():
     response = "o"
     if response.lower() == "o":
 
         for i in get_directory_content("./NumeralRush").split("\n"):
+            print(i)
             number_files = len(get_directory_content("./NumeralRush").split("\n"))
             pourcent = round((get_directory_content("./NumeralRush").split("\n").index(i) + 1) / number_files * 100)
             if i != "":
                 if "data/" in i or "version.nr" in i:
                     continue
-                label.configure(text=f"Mise à jour de {i} en cours..." + f" ({pourcent}%)")
-                progress_bar.set((get_directory_content("./NumeralRush").split("\n").index(i) + 1) / number_files)
+                send_msg(f"{pourcent/100}", f"Mise à jour de {i} en cours... ({pourcent}%)")
                 # recuperer le contenu du fichier
                 content = content_file(f"./{i}")
                 if content == None:
@@ -124,7 +129,6 @@ def update(label : customtkinter.CTkLabel = None, progress_bar : customtkinter.C
                     if not isinstance(content, str) and content[0] == "image":
                         with open(f"{i}", 'wb') as file:
                             file.write(content[1])
-                            label.configure(text=f"Mise à jour de {i} terminée..." + f" ({pourcent}%)")
                             continue
                     with open(f"{i}", 'w') as file:
                         file.write(content)
@@ -132,17 +136,18 @@ def update(label : customtkinter.CTkLabel = None, progress_bar : customtkinter.C
                     os.chmod(f"{i}", 0o777)
                     with open(f"{i}", 'w') as file:
                         file.write(content)
-                label.configure(text=f"Mise à jour de {i} terminée..." + f" ({pourcent}%)")
 
         content = content_file("NumeralRush_v1/version.nr")
         with open("version", 'w') as file:
             file.write(content)
 
-        print("Mise à jour terminée.")
+        send_msg("100", "Mise à jour terminée.")
         global maj1
         maj1 = True
-    else:
-        print("Mise à jour annulée.")
+        with open("content", 'w') as file:
+            file.write("//")
+        with open("NumeralRush_v1/NumeralRush_app/starter", 'w') as file:
+            file.write("True")
 
 def check_update():
     import customtkinter
@@ -173,19 +178,24 @@ def check_update():
     label_version.place(x=420, y=0)
 
     button_update = customtkinter.CTkButton(master=frame, text="Mettre à jour"
-                                            , font=("Arial", 16), command=update, state="disabled")
+                                            , font=("Arial", 16), state="disabled")
     button_update.pack(pady=10, padx=10)
 
     def update_callback():
+        button_update.configure(text="mise à jour en cours")
         label.configure(text="Mise à jour en cours...")
         button_update.configure(state="disabled")
-        threading.Thread(target=update, args=(label, progress_bar)).start()
+        threading.Thread(target=update).start()
         while True:
             root.update()
             if maj1 == False:
                 continue
             else:
-                button_update.configure(state="normal", text="continuer", command=lambda: root.destroy())
+                def callback():
+                    for i in root.winfo_children():
+                        i.destroy()
+                    return root
+                button_update.configure(state="normal", text="continuer", command=callback)
                 progress_bar.stop()
                 progress_bar.set(1)
                 progress_bar.configure(mode="determinate", progress_color="green")
@@ -199,13 +209,33 @@ def check_update():
 
     def check():
         root.update()
-        if isinstance(update_checker(root), tuple):
+        check = update_checker(root)
+        print(54)
+        if isinstance(check, tuple):
+            print(1)
             button_update.configure(state="normal")
             progress_bar.stop()
-            label.configure(text=update_checker()[1])
+            label.configure(text=check[1])
             progress_bar.set(1)
             progress_bar.configure(mode="determinate", progress_color="green")
             button_update.configure(state="normal", text="mettre à jour", command=update_callback)
+            while True:
+                root.update()
+                with open("NumeralRush_v1/NumeralRush_app/starter", 'r') as file:
+                    if file.read() == "True":
+                        with open("NumeralRush_v1/NumeralRush_app/starter", 'w') as file:
+                            file.write("False")
+                        break
+                    else:
+                        with open("msg", 'r') as file:
+                            msg = file.read()
+                            print(msg)
+                            if msg == "":
+                                time.sleep(0.0001)
+                                continue
+                            label.configure(text=msg.split("\n")[1])
+                            progress_bar.set(float(msg.split("\n")[0]))
+            return root
         else:
             label.configure(text="Aucune mise à jour disponible.")
             progress_bar.stop()
@@ -216,6 +246,7 @@ def check_update():
                 time.sleep(0.001)
             for i in root.winfo_children():
                 i.destroy()
+            print(root)
             return root
 
     return check()
