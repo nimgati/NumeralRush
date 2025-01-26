@@ -22,10 +22,13 @@ file_banner = customtkinter.CTkImage(
 
 class Application:
     def __init__(self):
+        self.button_piece = None
+        self.button_xp = None
         customtkinter.set_appearance_mode("green")
         customtkinter.set_default_color_theme("green")
         self.db = datahand.Datahand()
         self.user_data = None
+        self.username = None
         self.height_root, self.width_root = opt.height, opt.width
         self.root = customtkinter.CTk()
         self.root.iconbitmap("NumeralRush_v1/NumeralRush_app/src/logo_app.ico")
@@ -127,14 +130,14 @@ class Application:
             canvas.create_rectangle(560, 15, 790 + (10 * (len(best_player) - 8)), 85, outline="white", width=3)
             canvas.create_image(600, 50, image=self.medaille_image, anchor="center")
             canvas.create_text(700 + (5 * (len(best_player) - 8)), 50, text=best_player, font=("Arial", 20, "bold"), fill="black")
-            button_xp = customtkinter.CTkButton(master=self.frame_header, text=str(self.user_data["xp"]) + " XP"
+            self.button_xp = customtkinter.CTkButton(master=self.frame_header, text=str(self.user_data["xp"]) + " XP"
                                                 , width=120, corner_radius=0, font=("Arial", 20), border_width=2,
                                                 text_color="white", border_color="white", height=50)
-            button_xp.place(x=330, y=0)
-            button_piece = customtkinter.CTkButton(master=self.frame_header, text=str(self.user_data["piece"]) + " 💎"
+            self.button_xp.place(x=330, y=0)
+            self.button_piece = customtkinter.CTkButton(master=self.frame_header, text=str(self.user_data["piece"]) + " 💎"
                                                     , width=120, corner_radius=0, font=("Arial", 20)
                                                    , height=50, border_color="white", border_width=2)
-            button_piece.place(x=330, y=51)
+            self.button_piece.place(x=330, y=51)
 
         canvas.pack(pady=0, padx=0, fill="x", side="top")
 
@@ -200,6 +203,7 @@ class Application:
             if (self.db.get_users_exists(entry_username.get())
                     and self.db.get_users_password(entry_username.get()) == entry_password.get()):
                 self.user_data = self.db.get_user_data(entry_username.get())
+                self.username = entry_username.get()
                 self.reset_root()
                 self.loader()
                 self.menu()
@@ -360,9 +364,46 @@ class Application:
                                                   , font=("Arial", 20), corner_radius=10)
         button_disconnect.pack(pady=10, padx=10)
 
-        button_back = customtkinter.CTkButton(master=self.frame_body, text="Retour", command=self.menu
+        button_enter_code = customtkinter.CTkButton(master=self.frame_body, text="Entrer un code", command=self.enter_code
                                                   , font=("Arial", 20), corner_radius=10)
-        button_back.pack(pady=10, padx=10)
+        button_enter_code.pack(pady=10, padx=10)
+
+    def add_xp(self, xp: int):
+        self.db.add_xp(pseudo=self.username, xp2=xp)
+        self.user_data = self.db.get_user_data(self.username)
+        self.button_xp.configure(text=str(self.user_data['xp']) + " xp")
+
+    def enter_code(self):
+        fen_code = customtkinter.CTkToplevel(self.root)
+        fen_code.geometry("400x200")
+        fen_code.title("Entrer un code")
+        fen_code.resizable(False, False)
+        fen_code.attributes("-topmost", True)
+
+        entry_code = customtkinter.CTkEntry(master=fen_code, placeholder_text="Code", width=200, font=("Arial", 16),
+                                            text_color="white", corner_radius=10,
+                                            border_color="black", border_width=2)
+        entry_code.pack(pady=10, padx=10)
+
+        entry_code.bind("<FocusIn>", lambda event: entry_code.configure(border_color="white", border_width=2))
+        entry_code.bind("<FocusOut>", lambda event: entry_code.configure(border_color="black", border_width=2))
+
+        def validate():
+            if entry_code.get() == "":
+                tkinter.messagebox.showerror("Error", "Veuillez remplir le champ")
+                return fen_code.destroy()
+            if not self.db.get_code_exists(entry_code.get()):
+                tkinter.messagebox.showerror("Error", "Code incorrect")
+                entry_code.delete(0, "end")
+                return fen_code.destroy()
+            else:
+                recompense = self.db.use_code(entry_code.get(), pseudo=self.username)
+                self.add_xp(xp=recompense)
+                tkinter.messagebox.showinfo("Success", "Code correct : +" + str(recompense) + "xp")
+                return fen_code.destroy()
+
+        customtkinter.CTkButton(master=fen_code, text="Valider", command=lambda : validate(),
+                                               font=("Arial", 20), corner_radius=10).pack(pady=10, padx=10)
 
     def shop(self):
         self.reset_root()

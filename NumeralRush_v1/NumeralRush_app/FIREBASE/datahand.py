@@ -47,9 +47,10 @@ class Datahand:
         piece = self._database.collection(u'users').document(pseudo).get().to_dict()["piece"] - piece
         self._database.collection(u'users').document(pseudo).collection(u'pieces').document().set({"piece" : piece})
 
-    def add_xp(self, pseudo : str, xp : int):
-        xp = self._database.collection(u'users').document(pseudo).get().to_dict()["xp"] + xp
-        self._database.collection(u'users').document(pseudo).collection(u'xp').document().set({"xp" : xp})
+    def add_xp(self, pseudo : str, xp2 : int):
+        xp = self._database.collection(u'users').document(pseudo).get().to_dict()
+        xp["xp"] += xp2
+        self._database.collection(u'users').document(pseudo).set(xp)
 
     def remove_xp(self, pseudo : str, xp : int):
         xp = self._database.collection(u'users').document(pseudo).get().to_dict()["xp"] - xp
@@ -95,6 +96,15 @@ class Datahand:
 
     def get_piece(self, pseudo : str) -> int:
         return self._database.collection(u"users").document(pseudo).get().to_dict()["piece"]
+
+    def get_code_exists(self, code : str) -> bool:
+        return self._database.collection(u"codes").document(code).get().exists
+
+    def use_code(self, code : str, pseudo : str) -> int:
+        if self._database.collection(u"codes").document(code).get().to_dict()["users"].count(pseudo) >= 1:
+            return 0
+        self._database.collection(u"codes").document(code).update({"users" : firestore.ArrayUnion([pseudo])})
+        return self._database.collection(u"codes").document(code).get().to_dict()["recompense"]
 
     def add_user(self, pseudo : str, mdp: str):
         data = {
