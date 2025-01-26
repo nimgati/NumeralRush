@@ -77,7 +77,7 @@ def update_checker(root : customtkinter.CTk):
             content = content_file("NumeralRush_v1/version.nr")
             return content
         content = th1()
-        with open("content", 'w') as file:
+        with open("content.txt", 'w') as file:
             file.write(content)
 
     threading.Thread(target=test, args=()).start()
@@ -86,24 +86,31 @@ def update_checker(root : customtkinter.CTk):
         time.sleep(0.001)
         root.update()
 
-    with open("content", 'r') as file:
+    with open("content.txt", 'r') as file:
         content = file.read()
 
-    with open("content", 'w') as file:
+    with open("content.txt", 'w') as file:
         file.write("//")
 
     with open("version", 'r') as file:
         version = file.read()
-    print(content.split(":"), version.split(":")[1])
 
-    if content.split(":")[1] == version.split(":")[1]:
-        return False
-    else:
-        return True, 'Mise à jour disponible : ' + version.split(":")[1][:-1] + " -> " + content.split(":")[1]
+    try:
+        if content.split(":")[1] == version.split(":")[1]:
+            return False
+        else:
+            return True, 'Mise à jour disponible : ' + version.split(":")[1][:-1] + " -> " + content.split(":")[1]
+    except IndexError:
+        with open("content.txt", 'w') as file:
+            file.write("")
+        update_checker(root)
+
+msg_text = ""
 
 def send_msg(porcent_bar : str, label_text : str):
-    with open("content", 'w') as file:
-        file.write(f"{porcent_bar}\n{label_text}")
+    global msg_text
+    msg_text = f"{porcent_bar}::{label_text}"
+
 
 def update():
     response = "o"
@@ -113,10 +120,12 @@ def update():
             print(i)
             number_files = len(get_directory_content("./NumeralRush").split("\n"))
             pourcent = round((get_directory_content("./NumeralRush").split("\n").index(i) + 1) / number_files * 100)
+            send_msg(f"{pourcent / 100}", f"Mise à jour de {i} en cours... ({pourcent}%)")
+            with open("msg", "r") as file:
+                print(file.read())
             if i != "":
                 if "data/" in i or "version.nr" in i:
                     continue
-                send_msg(f"{pourcent/100}", f"Mise à jour de {i} en cours... ({pourcent}%)")
                 # recuperer le contenu du fichier
                 content = content_file(f"./{i}")
                 if content == None:
@@ -144,7 +153,7 @@ def update():
         send_msg("100", "Mise à jour terminée.")
         global maj1
         maj1 = True
-        with open("content", 'w') as file:
+        with open("content.txt", 'w') as file:
             file.write("//")
         with open("NumeralRush_v1/NumeralRush_app/starter", 'w') as file:
             file.write("True")
@@ -154,11 +163,11 @@ def check_update():
 
     root = customtkinter.CTk()
     root.title("Numeral Rush - Mise à jour")
-    root.geometry("600x400")
+    root.geometry("640x400")
     root.resizable(False, False)
 
     frame = customtkinter.CTkFrame(master=root, corner_radius=0)
-    frame.pack(pady=50, padx=60, fill="both", expand=True)
+    frame.pack(pady=40, padx=10, fill="both", expand=True)
     frame.pack_propagate(False)
 
     label = customtkinter.CTkLabel(master=frame, text="Recherche de mise a jour ...", font=("Arial", 24, "bold"))
@@ -175,7 +184,7 @@ def check_update():
 
     label_version = customtkinter.CTkLabel(master=root, corner_radius=0, fg_color="transparent"
                                            , text="version actuelle : " + version.split(":")[1][:-1], font=("Arial", 16, "bold"))
-    label_version.place(x=420, y=0)
+    label_version.place(x=450, y=0)
 
     button_update = customtkinter.CTkButton(master=frame, text="Mettre à jour"
                                             , font=("Arial", 16), state="disabled")
@@ -186,28 +195,11 @@ def check_update():
         label.configure(text="Mise à jour en cours...")
         button_update.configure(state="disabled")
         threading.Thread(target=update).start()
-        while True:
-            root.update()
-            if maj1 == False:
-                continue
-            else:
-                def callback():
-                    for i in root.winfo_children():
-                        i.destroy()
-                    return root
-                button_update.configure(state="normal", text="continuer", command=callback)
-                progress_bar.stop()
-                progress_bar.set(1)
-                progress_bar.configure(mode="determinate", progress_color="green")
-                with open("version", 'r') as file:
-                    version = file.read()
-                label_version.configure(text="version actuelle : " + version.split(":")[1][:-1])
-                label.configure(text="Mise à jour terminée.")
-                break
 
         return root
 
     def check():
+        global msg_text
         root.update()
         check = update_checker(root)
         print(54)
@@ -227,14 +219,16 @@ def check_update():
                             file.write("False")
                         break
                     else:
-                        with open("msg", 'r') as file:
-                            msg = file.read()
-                            print(msg)
-                            if msg == "":
-                                time.sleep(0.0001)
-                                continue
-                            label.configure(text=msg.split("\n")[1])
-                            progress_bar.set(float(msg.split("\n")[0]))
+                        msg = msg_text
+
+                        try:
+                            label.configure(font=("Arial", 18, "bold"))
+                            label.configure(text=msg.split("::")[1])
+                            progress_bar.set(float(msg.split("::")[0]))
+                        except:
+                            pass
+
+                        time.sleep(0.1)
             return root
         else:
             label.configure(text="Aucune mise à jour disponible.")

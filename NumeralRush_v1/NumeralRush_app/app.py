@@ -323,7 +323,7 @@ class Application:
         frame_level.pack(pady=0, padx=0, fill="y", side="left")
         for num, level in enumerate(os.listdir("NumeralRush_v1/NumeralRush_app/level")):
             button_level = customtkinter.CTkButton(master=frame_level, text="Niveau " + str(num + 1),
-                                                  font=("Arial", 28), width=(self.width_root / 5) - 20)
+                                                  font=("Arial", 28), width=(self.width_root / 5) - 23)
             button_level.grid(row=num//5, column=num%5, padx=10, pady=10)
 
     def leaderboard(self):
